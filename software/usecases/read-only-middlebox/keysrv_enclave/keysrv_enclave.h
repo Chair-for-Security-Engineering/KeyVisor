@@ -1,0 +1,7 @@
+#ifndef _KEYSRV_ENCLAVE_H_
+#define _KEYSRV_ENCLAVE_H_
+
+//#define KEYSRV_ENC_DEBUG_PRINTS 1
+#undef KEYSRV_ENC_DEBUG_PRINTS
+
+#endif /* _KEYSRV_ENCLAVE_H_ */

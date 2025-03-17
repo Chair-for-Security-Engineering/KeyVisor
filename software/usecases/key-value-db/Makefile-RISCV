@@ -1,0 +1,43 @@
+FIRESIM_IMG_PATH=$(CONDA_DEFAULT_ENV)/../software/firemarshal/images/keystone.img 
+
+FIRESIM_INC_PATH=$(CONDA_DEFAULT_ENV)/../software/firemarshal/boards/default/distros/br/buildroot/output/host/riscv64-buildroot-linux-gnu/sysroot/usr/include/
+
+FIRESIM_LIB_PATH=$(CONDA_DEFAULT_ENV)/../software/firemarshal/boards/default/distros/br/buildroot/output/host/riscv64-buildroot-linux-gnu/sysroot/usr/lib/
+
+CC=$(CONDA_DEFAULT_ENV)/../software/firemarshal/boards/default/distros/br/buildroot/output/host/bin/riscv64-unknown-linux-gnu-gcc
+
+CFLAGS=-I . -I include/ -I ../../include/ -I $(FIRESIM_INC_PATH)
+LDFLAGS=-L$(FIRESIM_LIB_PATH) -lprotobuf-c
+
+all: clean kvsrv websrv
+
+messages.pb-c.o: messages.pb-c.c messages.pb-c.h
+	$(CC) $(CFLAGS) -c messages.pb-c.c
+
+external/handle_pb_prefix.o:
+	$(CC) $(CFLAGS) -c external/handle_pb_prefix.c -o $@
+
+shared/usock-connection.o:
+	$(CC) $(CFLAGS) -c shared/usock-connection.c -o $@
+
+kvsrv: messages.pb-c.o messages.pb-c.h external/handle_pb_prefix.o shared/usock-connection.o
+	$(CC) $(CFLAGS) -c keyvalue-srv.c
+	$(CC) $(CFLAGS) -c kv-storage.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o keyvalue-srv keyvalue-srv.o kv-storage.o shared/usock-connection.o messages.pb-c.o external/handle_pb_prefix.o
+
+websrv: messages.pb-c.o messages.pb-c.h external/handle_pb_prefix.o shared/usock-connection.o
+	$(CC) $(CFLAGS) -c web-srv.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o web-srv web-srv.o shared/usock-connection.o messages.pb-c.o external/handle_pb_prefix.o
+
+clean:
+	rm -f ./*.o
+	rm -f ./external/*.o
+	rm -f ./shared/*.o
+	rm -f ./keyvalue-srv ./web-srv
+
+deploy: all
+	sudo mount -o loop $(FIRESIM_IMG_PATH) /mnt
+	sudo rm -rf /mnt/home/key-value-db
+	sudo mkdir -p /mnt/home/key-value-db
+	sudo cp -r keyvalue-srv web-srv /mnt/home/key-value-db
+	sudo umount /mnt

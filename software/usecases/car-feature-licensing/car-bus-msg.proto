@@ -1,0 +1,27 @@
+syntax = "proto2";
+
+package car_bus_msg_proto;
+
+enum RequestStatus {
+    REQUEST_SUCCESS = 0;
+    REQUEST_FAILED = 1;
+}
+
+message InitFeatureRequest {
+    required int32 feature_uid = 1;
+}
+
+message InitFeatureResponse {
+    required RequestStatus status = 1;
+    required bytes req_nonce = 2;
+}
+
+message ActivateFeatureRequest {
+    required bytes auth_token = 1;
+    required bytes token_iv = 2;
+    required bytes token_tag = 3;
+}
+
+message ActivateFeatureResponse {
+    required RequestStatus status = 1;
+}

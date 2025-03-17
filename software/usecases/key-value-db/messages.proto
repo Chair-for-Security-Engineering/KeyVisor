@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+package msg_proto;
+
+enum RequestStatus {
+    REQUEST_SUCCESS = 0;
+    REQUEST_FAILED = 1;
+}
+
+message DataWriteRequest {
+    required bytes storage_key = 1;
+    required bytes value_blob = 2;
+}
+
+message DataWriteResponse {
+    required RequestStatus status = 1;
+}
+
+message DataReadRequest {
+    required bytes storage_key = 1;
+}
+
+message DataReadResponse {
+    required RequestStatus status = 1;
+    required bytes value_blob = 2;
+}

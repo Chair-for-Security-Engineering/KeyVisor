@@ -1,0 +1,7 @@
+*.o
+*.riscv
+*.eapp_riscv
+build/
+include/sm_expected_hash.h
+libsodium_builds/
+keystone-sdk-x86/
